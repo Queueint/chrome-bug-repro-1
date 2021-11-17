@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
+
+    <style>
+        .container {
+            position: relative;
+            margin: auto;
+            width: 100%;
+            max-width: 128px;
+            height: 128px;
+        }
+
+        .green {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .red {
+            border-radius: 100%;
+            border-style: solid;
+            border-color: #f00 #f00 transparent transparent;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            animation-name: spin;
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+
+        }
+
+        @keyframes spin {
+            from {
+                transform: translate(-50%, -50%) rotate(0);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script type="text/babel">
+        function useParentSize(ref) {
+            const [parentHeight, setParentHeight] = React.useState(0);
+            const [parentWidth, setParentWidth] = React.useState(0);
+
+            const parent = ref.current && ref.current.parentElement;
+
+            React.useLayoutEffect(() => {
+                if (!parent) {
+                    return () => { };
+                }
+
+                const onResize = () => {
+                    const newHeight = parent.clientHeight;
+                    const newWidth = parent.clientWidth;
+                    if (parentHeight !== newHeight) {
+                        setParentHeight(newHeight);
+                    }
+                    if (parentWidth !== newWidth) {
+                        setParentWidth(newWidth);
+                    }
+                };
+                onResize();
+
+                window.addEventListener('resize', onResize);
+                return () => {
+                    window.removeEventListener('resize', onResize);
+                };
+            });
+
+            return [parentWidth, parentHeight];
+        }
+
+        const Green = () => {
+            const ref = React.useRef();
+            const [parentWidth, parentHeight] = useParentSize(ref);
+
+            const radius = Math.min(parentHeight, parentWidth) / 2;
+            const stroke = 9;
+            const normalizedRadius = radius - stroke / 2;
+            const circumference = normalizedRadius * 2 * Math.PI;
+
+            return (
+                <svg ref={ref} className="green" height={radius * 2} width={radius * 2}>
+                    <circle
+                        fill="#0f0"
+                        strokeWidth={stroke}
+                        strokeDasharray={`${circumference} ${circumference}`}
+                        r={normalizedRadius > 0 ? normalizedRadius : 0}
+                        cx={radius}
+                        cy={radius}
+                    />
+                </svg>
+            );
+        };
+
+        const Red = () => {
+            const ref = React.useRef();
+            const [parentWidth, parentHeight] = useParentSize(ref);
+
+            const diameter = Math.min(parentWidth, parentHeight);
+
+            return (
+                <div
+                    ref={ref}
+                    className="red"
+                    style={{
+                        width: diameter,
+                        height: diameter,
+                    }}
+                ></div>
+            );
+        };
+
+        const App = () => {
+            const [, setFoo] = React.useState(false);
+
+            React.useEffect(() => {
+                setFoo(true);
+            }, []);
+
+            return (
+                <div className="container">
+                    <Green />
+                    <Red />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
