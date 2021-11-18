@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
+
+    <style>
+        .container {
+            position: relative;
+            margin: auto;
+            width: 100%;
+            max-width: 128px;
+            height: 128px;
+        }
+
+        .green {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .red {
+            border-radius: 100%;
+            border-style: solid;
+            border-color: #f00 #f00 transparent transparent;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            animation-name: spin;
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+
+        }
+
+        @keyframes spin {
+            from {
+                transform: translate(-50%, -50%) rotate(0);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <svg class="green" height="0" width="0">
+            <circle fill="#0f0" stroke-width="0" stroke-dash-array="0 0" r="0" cx="0" cy="0" />
+        </svg>
+        <div class="red" style="width: 0; height: 0"></div>
+    </div>
+
+    <script>
+        let width = 0;
+        let height = 0;
+
+        const onParentResize = () => {
+            // Green
+            const green = document.getElementsByClassName('green')[0];
+            const circle = green.getElementsByTagName('circle')[0];
+            const radius = Math.min(height, width) / 2;
+            const stroke = 9;
+            const normalizedRadius = radius - stroke / 2;
+            const circumference = normalizedRadius * 2 * Math.PI;
+            green.setAttribute('height', `${radius * 2}`);
+            green.setAttribute('width', `${radius * 2}`);
+            circle.setAttribute('stroke-width', `${stroke}`);
+            circle.setAttribute('stroke-dash-array', `${circumference} ${circumference}`);
+            circle.setAttribute('r', normalizedRadius > 0 ? `${normalizedRadius}` : '0');
+            circle.setAttribute('cx', `${radius}`);
+            circle.setAttribute('cy', `${radius}`);
+
+            // Red
+            const red = document.getElementsByClassName('red')[0];
+            const diameter = Math.min(width, height);
+            red.style.width = `${diameter}px`;
+            red.style.height = `${diameter}px`;
+        };
+
+        onParentResize();
+
+        const setParentHeight = (newHeight) => {
+            setTimeout(() => {
+                height = newHeight;
+                onParentResize();
+            });
+        };
+
+        const setParentWidth = (newWidth) => {
+            setTimeout(() => {
+                width = newWidth;
+                onParentResize();
+            });
+        };
+
+        const onResize = () => {
+            const parent = document.getElementsByClassName('container')[0];
+            const newHeight = parent.clientHeight;
+            const newWidth = parent.clientWidth;
+
+            if (height !== newHeight) {
+                setParentHeight(newHeight);
+            }
+            if (width !== newWidth) {
+                setParentWidth(newWidth);
+            }
+        };
+        onResize();
+        window.addEventListener('resize', onResize);
+    </script>
+</body>
+
+</html>
